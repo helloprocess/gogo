@@ -26,5 +26,5 @@ COPY php.ini /usr/local/etc/php/conf.d/custom.ini
 COPY xdebug.ini /usr/local/etc/php/conf.d/xdebug.ini
 
 # Exponer puertos y configurar comandos por defecto
-EXPOSE 9000 9003
+EXPOSE 9001 9003
 CMD ["php-fpm"]
