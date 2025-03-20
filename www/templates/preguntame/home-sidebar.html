@@ -1,0 +1,74 @@
+{% if next OR previous %}
+
+<div class="sidebox-rounded orange">
+    <div class="header"><h4><a href="https://www.meneame.net/m/Pregúntame">PREGÚNTAME</a></h4></div>
+
+    <div class="body">
+        {% if next %}
+        <div class="finished">SIGUIENTES</div>
+
+        {% for row in next %}
+        <div class="guest">
+            {% if row.link %}
+
+            <a title="{{ row.title }}" href="{{ row.link }}">
+                <img alt="{{ row.title }}" src="{{ row.getMediaImage() }}" />
+
+                <div class="guest-name">{{ row.title }}</div>
+                <div class="guest-description">{{ row.subtitle }}</div>
+                <div class="datetime">
+                    {% exec Time::dayMonthSortHour row.start_at %}
+
+                    {% if row.sponsored %}
+                    <span class="sponsored">{% trans _('patrocinado') %}</span>
+                    {% endif %}
+                </div>
+            </a>
+
+            {% else %}
+
+            <img alt="{{ row.title }}" src="{{ row.getMediaImage() }}" />
+
+            <div class="guest-name">{{ row.title }}</div>
+            <div class="guest-description">{{ row.subtitle }}</div>
+            <div class="datetime">
+                {% exec Time::dayMonthSortHour row.start_at %}
+
+                {% if row.sponsored %}
+                <span class="sponsored">{% trans _('patrocinado') %}</span>
+                {% endif %}
+            </div>
+
+            {% endif %}
+        </div>
+        {% endfor %}
+
+        {% endif %}
+
+        {% if previous %}
+        <div class="finished">FINALIZADOS</div>
+
+        {% for row in previous %}
+        <div class="guest">
+            <a title="{{ row.title }}" href="{{ row.link }}">
+                <img alt="{{ row.title }}" src="{{ row.getMediaImage() }}" />
+
+                <div class="guest-name">{{ row.title }}</div>
+                <div class="guest-description">{{ row.subtitle }}</div>
+
+                <span class="show-responses">
+                    Ver respuestas &raquo;
+
+                    {% if row.sponsored %}
+                    <span class="sponsored">{% trans _('patrocinado') %}</span>
+                    {% endif %}
+                </span>
+            </a>
+        </div>
+        {% endfor %}
+
+        {% endif %}
+    </div>
+</div>
+
+{% endif %}

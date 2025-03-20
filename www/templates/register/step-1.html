@@ -1,0 +1,29 @@
+<section class="section section-large text-center">
+    <h1>{% trans _('Prevención de bots') %}</h1>
+
+    <div class="container container-small">
+        <form id="form-register" method="post" class="form">
+            {{ captcha_form }}
+
+            <div class="form-group">
+                <button type="submit" name="submit" class="btn btn-mnm btn-lg btn-block" tabindex="2">{% trans _('Continuar') %}</button>
+            </div>
+            {% if _POST.username %}
+                {% set my_username = _POST.username %}
+            {% else %}
+                {% set my_username = '' %}
+            {% endif %}
+            {% if _POST.email %}
+                {% set my_email = _POST.email %}
+            {% else %}
+                {% set my_email = '' %}
+            {% endif %}            
+            <input type="hidden" name="process" value="2" />
+            <input type="hidden" name="email" value="{% exec htmlspecialchars my_email %}" />
+            <input type="hidden" name="username" value="{% exec htmlspecialchars my_username %}" />
+            <input type="hidden" name="password" value="{% exec htmlspecialchars _POST.password %}" />
+
+            <div class="bottomline">{% trans _('Cuando te registras aceptas las <a href="{{ globals.base_url_general }}legal" target="_blank">Condiciones de Uso, Política de Privacidad y el Uso de Cookies</a>') %}.</div>
+        </form>
+    </div>
+</section>

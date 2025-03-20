@@ -1,0 +1,48 @@
+original_color,new_color,description,note
+#fbfbfb,#181818,Fondo principal,Se sustituye por un gris muy oscuro para reducir la fatiga visual en entornos oscuros.
+#000,#e0e0e0,Texto principal,Se usa un gris claro que ofrece excelente contraste sobre fondos oscuros.
+#FF6D00,#FF8C00,Color de acento y marca,Se mantiene la tonalidad característica de la marca pero se ajusta su luminosidad para resaltar sobre fondo oscuro.
+#FFF,#333333,Fondo de elementos (inputs, contenedores),Se reduce el brillo excesivo de blancos para integrar mejor los elementos en un entorno oscuro.
+#ddd,#444444,Bordes y separadores,Se oscurece el color para que los bordes sean sutiles pero visibles en un fondo oscuro.
+#303030,#CCCCCC,Texto en inputs,Se aclara el texto para asegurar una lectura óptima sobre fondos oscuros.
+#FFB300,#FFA726,Estado hover de botones,Se suaviza el tono para indicar interacción sin perder la identidad del acento.
+#feefe5,#666666,Estado deshabilitado en botones,Se opta por un gris medio que indica inactividad sin romper el contraste general.
+#FFF1E2,#2A2A2A,Fondo de fieldset,Se utiliza un tono cálido oscuro que armoniza con la base del tema.
+#101010,#101010,Fondo de cabecera secundaria,Ya es un tono oscuro; se mantiene para preservar la estructura jerárquica.
+#B7B7B7,#CCCCCC,Texto secundario en cabecera,Se aclara el texto para mejorar la legibilidad sobre fondos oscuros.
+#E9E9E9,#333333,Fondo de menú,Se adapta a un gris oscuro para mantener la coherencia visual.
+#D6D6D6,#444444,Bordes del menú,Se oscurece el borde para que la separación sea sutil en un contexto oscuro.
+#03a,#3399FF,Enlaces (no visitados),Se propone un azul vibrante que destaca sobre fondo oscuro.
+#551a8b,#9B59B6,Enlaces visitados,Se cambia a un púrpura moderado que ofrece contraste sin ser agresivo.
+#aaa,#777777,Texto en estados deshabilitados,Se reduce la saturación para denotar inactividad manteniendo legibilidad.
+#A1A1A1,#888888,Fondo de controles (checkbox slider),Se pasa a un gris medio que se integra en la nueva paleta.
+#9B3A0C,#E09E3C,Títulos destacados (#toplink h1 a),Se sustituye por un tono dorado oscuro que resalta sin perder identidad.
+#3C3C3C,#BBBBBB,Texto de párrafos y contenidos,Se aclara para mejorar la visibilidad en el fondo oscuro.
+#FF6600,#FF8C00,Botón o enlace destacado (#toplink a.footer),Se alinea con el acento de marca pero adaptado al contraste oscuro.
+#f9f9f9,#2A2A2A,Fondo de contenedores (topbox, etc.),Se reduce a un gris profundo para mantener la coherencia en la interfaz.
+#c91223,#B22222,Alertas y encabezados rojos,Se oscurece el rojo para conservar el impacto visual sin sobresaturar.
+#f8f8f8,#333333,Fondo de encabezados de sidebox,Se adapta a un gris oscuro para unificar la apariencia.
+#dadada,#555555,Bordes en sidebox,Se sustituye por un gris medio que delimita las secciones de forma sutil.
+#7e7e7e,#AAAAAA,Textos secundarios en sidebox,Se aclara para mejorar la legibilidad.
+#666,#888888,Enlaces secundarios en sidebox,Se ajusta para un contraste adecuado sin perder sutileza.
+#039,#3399FF,Etiquetas y enlaces en tagcloud,Se utiliza un azul vibrante para destacar sobre fondo oscuro.
+#5073c5,#8190D2,Enlaces en pie de página,Se pasa a un azul moderado que facilita la lectura.
+#999,#CCCCCC,Textos en elementos secundarios (pie de página, etc.),Se aclara para resaltar información secundaria.
+#FFA726,#FFB74D,Etiquetas en categorías (dl.categorylist dd),Se suaviza el tono para integrar la identidad en el tema oscuro.
+#FFD5AD,#665544,Fondos de comentarios destacados,Se oscurece el fondo para mantener énfasis sin generar deslumbramiento.
+#444,#AAAAAA,Fechas y textos secundarios en comentarios,Se aclara el color para mejorar la visibilidad de detalles.
+#EBEDF4,#3A3A50,Fondos de comentarios de autor,Se transforma a un tono frío oscuro para diferenciar la autoría.
+#CAD0E2,#4A4A66,Fondos de comentarios destacados de autor,Se ajusta para resaltar sin perder la armonía general.
+#EEE,#444444,Fondos de comentarios fantasma,Se oscurece para evitar brillos innecesarios en secciones menos importantes.
+#C85000,#D35400,Iconografía y enlaces en comentarios,Se modifica a un naranja profundo que mantiene la identidad adaptada al tema oscuro.
+#81D4FA,#A3C8FF,Elementos de pie de comentario (votos, enlaces),Se utiliza un azul suave que equilibra el contraste en elementos interactivos.
+green,#66BB6A,Votos positivos,Se emplea un verde moderado para denotar acciones positivas en un contexto oscuro.
+red,#EF5350,Votos negativos,Se opta por un rojo suave que destaca sin saturar la interfaz.
+#FFD740,#FFCA28,Contadores de respuestas,Se pasa a un amarillo dorado para una visibilidad óptima en fondo oscuro.
+#F5720E,#F57C00,Gradiente de botones (menealo),Se ajusta la transición manteniendo la energía visual característica.
+#FF7043,#FF8A50,Gradiente de botones (menealo),Se suaviza la transición para una integración armónica.
+#FF9100,#FFA726,Bordes en botones (menealo),Se adapta el contorno para que el botón resalte adecuadamente en el nuevo esquema.
+#FEFBEA,#3B3B30,Fondos de advertencia en noticias,Se oscurece para evitar excesivo brillo en mensajes de advertencia.
+#F2F5FA,#2E2E3A,Fondos de artículos promovidos,Se ajusta para mantener la jerarquía visual sin romper la coherencia del tema.
+#8AAED9,#6A8FBF,Elementos promocionales,Se utiliza un azul moderado para detalles destacados sin perder integración.
+#C43E0B,#A8320A,Sombras en botones (menealo),Se oscurece la sombra para generar profundidad sin afectar el contraste.

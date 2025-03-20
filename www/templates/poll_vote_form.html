@@ -1,0 +1,28 @@
+<form action="{{ globals.base_url_general }}backend/poll.php" method="post">
+    <input type="hidden" name="id" value="{{ poll.id }}" />
+
+    <div class="poll-options">
+        {% for option in poll.getOptions %}
+        <div class="radio poll-option">
+            <label>
+                <input type="radio" name="option" value="{{ option.id }}" />
+                {{ option.option }}
+            </label>
+        </div>
+        {% endfor %}
+    </div>
+
+    <footer>
+        <button type="submit" class="btn btn-mnm btn-sm">{% trans _('Votar') %}</button>
+
+        <span class="votes">
+            {% if poll.votes == 1 %}
+            {% trans _('1 voto') %}
+            {% else %}
+                {% if poll.votes %} {% trans _('%s votos') poll.votes %} {% else %} {% trans _('Sin Votos') %} {% endif %}
+            {% endif %}
+        </span>
+        <span class="separator">|</span>
+        <span class="finish">{% exec poll.getTimeToFinish %}</span>
+    </footer>
+</form>

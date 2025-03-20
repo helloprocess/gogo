@@ -1,0 +1,29 @@
+| Original Color  | New Color   | Tipo                  | Notas                                  |
+
+| #121212         | #121212     | Fondo                 | Se mantiene (cumple estándares)        |
+| #ddd            | #FFFFFF     | Texto primario        | Mejor contraste                         |
+| #aaa            | #B0B0B0     | Texto secundario      | Legibilidad mejorada                   |
+| #ccc            | #B0B0B0     | Texto secundario      | Unificación de tonos                   |
+| #fff            | #FFFFFF     | Blanco                | Mantenido para elementos clave         |
+| #e35614         | #FF6D00     | Naranja primario      | Material Orange 800                    |
+| #ff8c40         | #FF9100     | Naranja hover         | Mayor visibilidad estados activos      |
+| #ff9400         | #FFAB40     | Naranja alternativo   | Material Orange 400                    |
+| #c91223         | #CF6679     | Alertas/Errores       | Rojo accesible para dark themes         |
+| #101010         | #1E1E1E     | Fondo oscuro          | Mejor jerarquía visual                  |
+| #1e1e1e         | #1E1E1E     | Paneles/inputs        | Mantenido (óptimo contraste)            |
+| #2a2a2a         | #2D2D2D     | Bordes/menús          | Elevación media Material                |
+| #444            | #424242     | Gris medio            | Reducción fatiga visual                 |
+| #333            | #424242     | Deshabilitados        | Cumple AA para elementos inactivos      |
+| #3c3c3c         | #363636     | Paneles               | Mejor diferenciación de niveles         |
+| #66aaff         | #82B1FF     | Enlaces normales      | Material Blue 200                       |
+| #9a80d4         | #BB86FC     | Enlaces visitados     | Material Purple 200                     |
+| #3b5998         | #1877F2     | Facebook              | Color oficial actualizado               |
+| #55acee         | #1DA1F2     | Twitter/X             | Color azul oficial                      |
+| #4dc247         | #25D366     | WhatsApp              | Verde oficial mejorado                  |
+| #7b6663         | #EA4335     | Email                 | Rojo Gmail estándar                     |
+| #adcedf         | #8AB4F8     | Destacados            | Azul Material más legible               |
+| #FEFBEA         | #FFF8E1     | Advertencias          | Fondo amarillo suave                    |
+| #8AAED9         | #7986CB     | Promocionados         | Índigo Material                         |
+| #FFB600         | #FFD740     | Sombras/Números       | Amarillo Material 400                   |
+| #F5720E         | #FF9100     | Degradado botón       | Parte del gradiente actualizado         |
+| #FE4A00         | #FF6D00     | Degradado botón       | Base del gradiente                      |
