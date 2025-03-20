@@ -141,3 +141,25 @@ Elementos UI:
 - #444 🩶 (bordes)
 - #333 🩶 (deshabilitado)
 - #3c3c3c 🩶 (fondos)
+
+
+instalacion:
+# Instalar Docker
+apt update && apt upgrade -y
+apt install -y docker.io
+
+# Iniciar y habilitar Docker
+systemctl start docker
+systemctl enable docker
+
+# Instalar Docker Compose
+curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+chmod +x /usr/local/bin/docker-compose
+
+# Verificar instalación
+docker --version
+docker-compose --version
+
+git clone https://github.com/helloprocess/gogo
+
+

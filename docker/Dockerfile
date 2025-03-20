@@ -14,6 +14,8 @@ RUN apt-get update && apt-get install -y \
     curl \
     file \
     gettext \
+    sqlite3 \
+    libsqlite3-dev \
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
     && docker-php-ext-install exif gd mysqli pdo pdo_mysql pdo_sqlite mbstring zip dom xml simplexml gettext \
     && pecl install xdebug igbinary \
@@ -28,5 +30,5 @@ WORKDIR /var/www
 RUN git clone https://github.com/usuario/repo.git .
 
 # Exponer puertos y configurar comandos por defecto
-EXPOSE 9003
+EXPOSE 9000 9003
 CMD ["php-fpm"]
