@@ -25,10 +25,6 @@ RUN apt-get update && apt-get install -y \
 COPY php.ini /usr/local/etc/php/conf.d/custom.ini
 COPY xdebug.ini /usr/local/etc/php/conf.d/xdebug.ini
 
-# Clonar código desde GitHub
-WORKDIR /var/www
-RUN git clone https://github.com/usuario/repo.git .
-
 # Exponer puertos y configurar comandos por defecto
 EXPOSE 9000 9003
 CMD ["php-fpm"]
