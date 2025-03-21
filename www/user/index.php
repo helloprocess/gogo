@@ -26,39 +26,33 @@ if ($globals['bot'] && $page > 2) {
 if (!empty($_SERVER['PATH_INFO'])) {
     error_log("DEBUG: PATH_INFO: " . $_SERVER['PATH_INFO']);
 
-    // Separamos la cadena usando '/' como delimitador
     $url_args = preg_split('/\/+/', $_SERVER['PATH_INFO'], 6, PREG_SPLIT_NO_EMPTY);
     error_log("DEBUG: url_args array: " . print_r($url_args, true));
 
-    // Se espera que la URL tenga el formato: /user/<login>/<view>/<uid>
-    if (count($url_args) >= 2) {
-        // El primer elemento se espera que sea "user"
-        if (strtolower($url_args[0]) !== 'user') {
-            error_log("WARNING: Se esperaba 'user' en el primer elemento, se recibió: " . $url_args[0]);
-        }
-        // Asignamos el login (segundo elemento)
-        $_REQUEST['login'] = $url_args[1];
-        error_log("DEBUG: Extracted login: " . $_REQUEST['login']);
-    } else {
-        error_log("ERROR: No hay suficientes elementos en PATH_INFO para extraer el login. PATH_INFO: " . $_SERVER['PATH_INFO']);
-        $_REQUEST['login'] = '';
+    array_shift($url_args); // eliminar "user"
+
+    $_REQUEST['login'] = clean_input_string($url_args[0] ?? '');
+    $_REQUEST['view'] = clean_input_string($url_args[1] ?? '');
+    $_REQUEST['uid'] = intval($url_args[2] ?? 0);
+
+    if (!$_REQUEST['uid'] && is_numeric($_REQUEST['view'])) {
+        $_REQUEST['uid'] = intval($_REQUEST['view']);
+        $_REQUEST['view'] = '';
     }
 
-    // Extraemos 'view' si existe; si no, usamos 'profile' por defecto
-    $_REQUEST['view'] = $url_args[2] ?? 'profile';
-    error_log("DEBUG: Extracted view: " . $_REQUEST['view']);
-
-    // Extraemos 'uid' si existe; si no, se asigna 0
-    $_REQUEST['uid'] = isset($url_args[3]) ? intval($url_args[3]) : 0;
-    error_log("DEBUG: Extracted uid: " . $_REQUEST['uid']);
+    error_log("DEBUG: login=" . $_REQUEST['login'] . " | view=" . $_REQUEST['view'] . " | uid=" . $_REQUEST['uid']);
 } else {
-    error_log("DEBUG: PATH_INFO está vacío.");
-    // Fallback: intentar extraer de GET o asignar valores por defecto
-    $_REQUEST['login'] = $_GET['login'] ?? '';
-    $_REQUEST['view'] = $_GET['view'] ?? 'profile';
-    $_REQUEST['uid'] = isset($_GET['uid']) ? intval($_GET['uid']) : 0;
-    error_log("DEBUG: Fallback values - login: " . $_REQUEST['login'] . ", view: " . $_REQUEST['view'] . ", uid: " . $_REQUEST['uid']);
+    $_REQUEST['login'] = clean_input_string($_REQUEST['login'] ?? '');
+    $_REQUEST['uid'] = intval($_REQUEST['uid'] ?? 0);
+    $_REQUEST['view'] = clean_input_string($_REQUEST['view'] ?? '');
+
+    if (!empty($_REQUEST['login'])) {
+        $url = html_entity_decode(get_user_uri($_REQUEST['login'], $_REQUEST['view']));
+        error_log("DEBUG: Redirigiendo a $url");
+        die(header("Location: $url"));
+    }
 }
+
 
 $user = new User();
 
