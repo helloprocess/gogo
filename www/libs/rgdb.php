@@ -257,9 +257,9 @@ class RGDB extends mysqli
         $this->last_result = array();
         $backtrace = debug_backtrace();
         if (isset($backtrace[1]['function'])) {
-            echo "Esta función fue llamada por: " . $backtrace[1]['function'];
+            error_log("\033[33m[QUERY LOG] Esta función fue llamada por: " . $backtrace[1]['function']. "\033[0m");
         } else {
-            echo "No fue llamada por ninguna función (llamada directa).";
+            error_log("\033[33m[QUERY LOG] No fue llamada por ninguna función (llamada directa).". "\033[0m");
         }
         error_log("\033[33m[QUERY LOG] " . $query . "\033[0m");
         //echo "<pre>QUERY: " . htmlspecialchars($query) . "</pre>";
