@@ -1,10 +1,31 @@
 <?php
-// Inicia el buffer de salida para retener cualquier salida hasta que se envíen los encabezados
+/**
+ * Funcion de logging con colores ANSI según tipo.
+ * Tipos posibles (ejemplo): 'dispatcher', 'links', 'mysql', 'error'
+ */
+function mi_error(string $mensaje, string $tipo): void
+{
+    static $colors = [
+        'dispatcher' => 21,  // Azul brillante
+        'links'      => 208, // Naranja
+        'mysql'      => 28,  // Verde oscuro
+        'error'      => 196, // Rojo intenso
+    ];
+    
+    // Obtiene el color según $tipo, o si no existe, usa 15 (blanco)
+    $colorCode = $colors[$tipo] ?? 15;
+    
+    // Prefijamos "DEBUG" solo como un ejemplo. Puedes quitarlo o cambiarlo.
+    // \033[0m al final para resetear el color.
+    error_log("\033[38;5;{$colorCode}mDEBUG:{$tipo}: {$mensaje}\033[0m");
+}
+
+// Inicia el buffer de salida para retener la salida hasta que se envíen los encabezados
 ob_start();
 
 // DEBUG: Mostrar los valores de REQUEST_URI y PATH_INFO
-error_log("\033[38;5;208mDEBUG:REQUEST_URI: " . $_SERVER['REQUEST_URI'] . "\033[0m");
-error_log("\033[38;5;208mDEBUG:PATH_INFO: " . (isset($_SERVER['PATH_INFO']) ? $_SERVER['PATH_INFO'] : 'NO DEFINIDO') . "\033[0m");
+mi_error("REQUEST_URI: " . $_SERVER['REQUEST_URI'], 'dispatcher');
+mi_error("PATH_INFO: " . (isset($_SERVER['PATH_INFO']) ? $_SERVER['PATH_INFO'] : 'NO DEFINIDO'), 'dispatcher');
 
 // Detecta el esquema: 'https' si está activo, de lo contrario 'http'
 $scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
@@ -23,15 +44,15 @@ if ($port && (($scheme === 'http' && $port != 80) || ($scheme === 'https' && $po
 
 // Obtener la ruta: usamos PATH_INFO si está definido, de lo contrario parseamos REQUEST_URI
 $path_info = $_SERVER['PATH_INFO'] ?? parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
-error_log("\033[38;5;208mDEBUG:Usando path_info: " . $path_info . "\033[0m");
+mi_error("Usando path_info: " . $path_info, 'dispatcher');
 
 // Construir la URL completa para debug
 $full_url = $scheme . '://' . $host . $port_str . $path_info;
-error_log("\033[38;5;208mDEBUG:Full URL: " . $full_url . "\033[0m");
+mi_error("Full URL: " . $full_url, 'dispatcher');
 
 // Divide la ruta en segmentos para el ruteo
 $path = preg_split('/\/+/', $path_info, 10, PREG_SPLIT_NO_EMPTY) ?: array('');
-error_log("\033[38;5;208mDEBUG:Path segments: " . print_r($path, true) . "\033[0m");
+mi_error("Path segments: " . print_r($path, true), 'dispatcher');
 
 // Resto del código de ruteo...
 $routes = array(
@@ -85,25 +106,24 @@ $routes = array(
 
 // Comprueba que exista el primer segmento de la ruta, que esté definido en $routes y que el archivo exista
 if (!isset($path[0]) || !isset($routes[$path[0]]) || !is_file(__DIR__ . '/' . $routes[$path[0]])) {
-    error_log("\033[38;5;208mDEBUG:Ruta no encontrada para el segmento: " . (isset($path[0]) ? $path[0] : 'VACÍO') . "\033[0m");
+    mi_error("Ruta no encontrada para el segmento: " . (isset($path[0]) ? $path[0] : 'VACÍO'), 'error');
     require_once __DIR__ . '/config.php';
     do_error('not found', 404, true);
 }
 
 // Selecciona el script basado en el primer segmento
 $globals['script'] = $script = $routes[$path[0]];
-error_log("\033[38;5;208mDEBUG:Script a incluir: " . $script . "\033[0m");
+mi_error("Script a incluir: " . $script, 'dispatcher');
 
 // Ahora, actualiza $globals['path'] para que contenga el resto de la ruta (excluyendo el primer segmento)
 $globals['path'] = array_slice($path, 1);
 
 // Intenta incluir el script; si falla, lanza error 400
 if ((include __DIR__ . '/' . $script) === false) {
-    error_log("\033[38;5;208mDEBUG:Error al incluir el script: " . $script . "\033[0m");
+    mi_error("Error al incluir el script: " . $script, 'error');
     require_once __DIR__ . '/config.php';
     do_error('bad request ' . $script, 400, true);
 }
+
 // Finalmente, envía la salida acumulada
 ob_end_flush();
-
-
