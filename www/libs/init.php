@@ -101,7 +101,8 @@ if (($globals['cli'] === false) && getenv('HTTP_HOST')) {
     // Fill server names
     // Alert, if does not work with port 443, in order to avoid standard HTTP connections to SSL port
     if (empty($globals['server_name'])) {
-        $globals['server_name'] = strtolower(getenv('SERVER_NAME').":".getenv('SERVER_PORT'));
+        //$globals['server_name'] = strtolower(getenv('SERVER_NAME').":".getenv('SERVER_PORT'));
+        $globals['server_name'] = strtolower(getenv('SERVER_NAME'));
 
         if (getenv('SERVER_PORT') != 80 && getenv('SERVER_PORT') != 443) {
             $globals['server_name'] .= ':' . getenv('SERVER_PORT');
