@@ -6,7 +6,7 @@
 function mi_error(string $mensaje, string $tipo): void
 {
     static $colors = [
-        'dispatcher' => 21,  // Azul brillante
+        'dispatcher' => 33,  // Azul gris
         'links'      => 208, // Naranja
         'mysql'      => 28,  // Verde oscuro
         'error'      => 196, // Rojo intenso
@@ -45,7 +45,7 @@ if ($port && (($scheme === 'http' && $port != 80) || ($scheme === 'https' && $po
 // Obtener la ruta: usamos PATH_INFO si está definido, de lo contrario parseamos REQUEST_URI
 $path_info = $_SERVER['PATH_INFO'] ?? parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 mi_error("Usando path_info: " . $path_info, 'dispatcher');
-
+mi_error("_SERVER['REQUEST_URI']: " . $_SERVER['REQUEST_URI'], 'dispatcher');
 // Construir la URL completa para debug
 $full_url = $scheme . '://' . $host . $port_str . $path_info;
 mi_error("Full URL: " . $full_url, 'dispatcher');
