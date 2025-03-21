@@ -126,7 +126,7 @@ $globals['base_url_general'] = 'http://159.65.199.109/'; // Keep the original if
 $globals['base_static_noversion'] = $globals['scheme'] . '//';
 
 if (empty($globals['static_server'])) {
-    $globals['base_static_noversion'] .= $globals['base_url'];
+    $globals['base_static_noversion'] = $globals['base_url'];
 } else {
     $globals['base_static_noversion'] .= $globals['static_server'] . $globals['base_url'];
 }
