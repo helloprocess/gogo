@@ -120,7 +120,7 @@ $globals['server_name'] = 'localhost';
     $globals['user_ip_int'] = inet_ptod($globals['user_ip']);
 } */
 
-$globals['base_url_general'] = '/'; // Keep the original if it's modified in submnms
+$globals['base_url_general'] = 'http://159.65.199.109/'; // Keep the original if it's modified in submnms
 
 // Add always the scheme, it's necessary for headers and rss's
 $globals['base_static_noversion'] = $globals['scheme'] . '//';
