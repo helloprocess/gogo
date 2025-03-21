@@ -186,7 +186,7 @@ $config = array(
     $config['cache_dir'] = mnmpath . '/' . $globals['haanga_cache'] . '/Haanga/' . getenv('SERVER_NAME');
 }
  */
-$config['cache_dir'] = $globals['haanga_cache'] . '/Haanga/' . getenv('SERVER_NAME');
+$config['cache_dir'] = $globals['haanga_cache'] . '/Haanga/localhost';
 Haanga::configure($config);
 Haanga::checkCacheDir();
 
