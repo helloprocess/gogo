@@ -255,7 +255,12 @@ class RGDB extends mysqli
 
         // Flush cached values..
         $this->last_result = array();
-
+        $backtrace = debug_backtrace();
+        if (isset($backtrace[1]['function'])) {
+            echo "Esta función fue llamada por: " . $backtrace[1]['function'];
+        } else {
+            echo "No fue llamada por ninguna función (llamada directa).";
+        }
         error_log("\033[33m[QUERY LOG] " . $query . "\033[0m");
         //echo "<pre>QUERY: " . htmlspecialchars($query) . "</pre>";
         $result = @parent::query($query);
