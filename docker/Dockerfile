@@ -28,10 +28,6 @@ COPY xdebug.ini /usr/local/etc/php/conf.d/xdebug.ini
 # Crear directorio de logs y establecer permisos
 RUN mkdir -p /var/log/php /var/log/xdebug && chmod -R 777 /var/log/php /var/log/xdebug
 
-# Asegurar que PHP-FPM escuche en el puerto correcto
-RUN sed -i 's/listen = 127.0.0.1:9000/listen = 9001/' /usr/local/etc/php-fpm.d/www.conf \
-    && sed -i 's/listen = \/run\/php\/php8.3-fpm.sock/listen = 9001/' /usr/local/etc/php-fpm.d/www.conf
-
 # Exponer puertos y configurar comandos por defecto
-EXPOSE 9001 9003
+EXPOSE 9000 9003
 CMD ["php-fpm"]
