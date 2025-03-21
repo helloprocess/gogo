@@ -178,14 +178,15 @@ $config = array(
     ),
     'use_hash_filename' => false, /* don't use hash filename for generated php */
 );
-
+//Gogo
 // Allow full or relative pathname for the cache (i.e. /var/tmp or cache)
-if (strpos($globals['haanga_cache'], '/') === 0) {
+/* if (strpos($globals['haanga_cache'], '/') === 0) {
     $config['cache_dir'] = $globals['haanga_cache'] . '/Haanga/' . getenv('SERVER_NAME');
 } else {
     $config['cache_dir'] = mnmpath . '/' . $globals['haanga_cache'] . '/Haanga/' . getenv('SERVER_NAME');
 }
-
+ */
+$config['cache_dir'] = $globals['haanga_cache'] . '/Haanga/' . getenv('SERVER_NAME');
 Haanga::configure($config);
 Haanga::checkCacheDir();
 
