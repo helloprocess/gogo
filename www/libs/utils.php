@@ -679,16 +679,14 @@ function get_user_uri($username, $view = '') {
     return $uri;
 }
 
-function get_user_uri_by_uid($user, $view = '')
-{
+function get_user_uri_by_uid($user, $view = '') {
     $uid = guess_user_id($user);
-
-    // User does not exist, ensure it will give error later
     if ($uid == 0) {
         $uid = -1;
     }
-
-    return get_user_uri($user, $view)."/$uid";
+    // Quita la barra final con rtrim, antes de añadir "/$uid"
+    $baseUri = rtrim(get_user_uri($user, $view), '/');
+    return $baseUri . "/$uid";
 }
 
 function post_get_base_url($option = '', $give_base = true)
