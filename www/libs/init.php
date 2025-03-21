@@ -134,7 +134,7 @@ if (empty($globals['static_server'])) {
 //Gogo
 //$globals['base_static'] = $globals['base_static_noversion'].'v_'.$globals['v'].'/';
 //print_r($globals['base_static']);
-$globals['base_static'] = '/';
+$globals['base_static'] = 'http://159.65.199.109/';
 
 // Votes' tags
 $globals['negative_votes_values'] = array(-1 => _('irrelevante'), -2 => _('antigua'), -3 => _('cansina'), -4 => _('sensacionalista'), -5 => _('spam'), -6 => _('duplicada'), -7 => _('microblogging'), -8 => _('errónea'), -9 => _('copia/plagio'));

@@ -738,7 +738,7 @@ function get_no_avatar_url($size, $fullurl = true)
 {
     global $globals;
 
-    $url = $globals['base_static'].'/img/mnm/no-gravatar-2-'.$size.'.png';
+    $url = $globals['base_static'].'img/mnm/no-gravatar-2-'.$size.'.png';
 
     return $fullurl ? $url : url_no_scheme($url);
 }
