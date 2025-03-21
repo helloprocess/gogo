@@ -111,7 +111,7 @@ if (($globals['cli'] === false) && getenv('HTTP_HOST')) {
 } 
 //Gogo
 //$globals['server_name'] = 'localhost:8001';
-$globals['server_name'] = '159.65.199.109:80';
+$globals['server_name'] = 'localhost:80';
 
 /* elseif (empty($globals['server_name'])) {
     //$globals['server_name'] = 'http://localhost:8001'; // GOGO Warn: did you put the right server name?
