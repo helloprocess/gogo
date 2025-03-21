@@ -27,7 +27,9 @@ COPY xdebug.ini /usr/local/etc/php/conf.d/xdebug.ini
 
 # Crear directorio de logs y establecer permisos
 RUN mkdir -p /var/log/php /var/log/xdebug && chmod -R 777 /var/log/php /var/log/xdebug
+RUN mkdir -p /var/www/localhost && chown -R www-data:www-data /var/www/localhost
 
 # Exponer puertos y configurar comandos por defecto
 EXPOSE 9000 9003
+
 CMD ["php-fpm"]
