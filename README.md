@@ -1,165 +1,156 @@
-Menéame
-=======
+# Menéame 🗳️
 
-Source code for the social aggregator https://www.meneame.net (central repository) 
-/etc/php/8.1/cli/php.ini
+Repositorio Dockerizado de Menéame, un agregador social de noticias de código abierto. Este proyecto incluye la infraestructura necesaria para levantar todo el sistema de forma automática y consistente mediante Docker y Docker Compose.
 
-📁 meneame_project/        # Directorio raíz del proyecto
+---
+
+## 📦 Estructura del Proyecto
+
+```
+📁 meneame_project/
 │
-├── 📁 www/               # Código fuente de la aplicación (document root)
-│   ├── 📁 api/  
-│   ├── 📁 backend/
-│   ├── 📁 css/
-│   ├── 📁 fonts/
-│   ├── 📁 img/
-│   ├── 📁 js/
-│   ├── 📁 libs/
-│   ├── 📁 submit/
-│   ├── 📁 templates/
-│   ├── 📁 user/
-│   ├── 📜 .htaccess
-│   ├── 📜 index.php
-│   ├── 📜 config.php
-│   ├── 📜 dispatcher.php
-│   ├── 📜 router.php
-│   ├── 📜 login.php
-│   ├── 📜 register.php
-│   ├── 📜 search.php
-│   ├── 📜 values.php
-│   ├── 📜 story.php
-│   ├── 📜 rss2.php
-│   ├── 📜 topstories.php
-│   ├── 📜 sitemap.php
-│   └── 📜 etc...
-│
-├── 📁 docker/             # Configuración de Docker
-│   ├── 📜 Dockerfile      # Archivo Docker para PHP
-│   ├── 📜 php.ini         # Configuración de PHP
-│   ├── 📜 xdebug.ini      # Configuración de Xdebug
-│   ├── 📜 nginx.conf      # Configuración de Nginx
-│   └── 📜 .env            # Variables de entorno opcionales
-│
-├── 📁 sql/                # Base de datos
-│   ├── 📜 meneame.sql     # Archivo con la estructura de la base de datos
-│
-├── 📁 scripts/            # Scripts útiles (migraciones, backups, cron jobs, etc.)
-│
-├── 📁 vendor/             # Dependencias de Composer
-│
-├── 📜 docker-compose.yml  # Definición de servicios de Docker
-├── 📜 README.md           # Documentación del proyecto
-├── 📜 composer.json       # Definición de paquetes PHP
-├── 📜 composer.lock       # Estado actual de las dependencias
-└── 📜 .gitignore          # Ignorar archivos innecesarios en el repo
+├── www/                  # Código fuente principal de Menéame
+├── docker/               # Archivos de configuración de Docker
+├── sql/                  # Dump inicial de la base de datos
+├── scripts/              # Scripts adicionales (migraciones, backups, etc.)
+├── vendor/               # Dependencias de Composer (ya incluidas)
+├── docker-compose.yml    # Orquestación de contenedores
+├── composer.json         # Dependencias PHP
+├── php.ini               # Configuración de PHP
+├── xdebug.ini            # Configuración de Xdebug
+├── nginx.conf            # Configuración de Nginx
+├── meneame_ER.pdf        # Diagrama Entidad-Relación de la base de datos
+└── README.md             # Este documento
+```
 
-Colores Base
+---
 
-Fondo oscuro principal: #121212
+## ⚙️ Servicios Incluidos
 
-Texto claro: #ddd
+| Servicio     | Descripción                                     |
+|--------------|--------------------------------------------------|
+| Nginx        | Servidor web reverse proxy para PHP              |
+| PHP-FPM 8.3  | Ejecutor de código PHP con Xdebug y extensiones  |
+| MySQL 8.0    | Base de datos relacional con carga automática    |
+| phpMyAdmin   | Interfaz web para gestión de la base de datos    |
+| Portainer    | Dashboard opcional para administrar contenedores |
 
-Texto secundario/deshabilitado: #aaa, #ccc
+---
 
-Blanco puro: #fff
+## 🎨 Diseño y Colores Base
 
-Acentos Principales
+El diseño se basa en una interfaz oscura con acentos cálidos.  
+Consulta el bloque de diseño de colores incluido en este mismo archivo si deseas personalizar el tema visual.
 
-Naranja primario: #e35614
+---
 
-Naranja hover/botones: #ff8c40
+## 📥 Instalación del Proyecto
 
-Naranja alternativo: #ff9400
+### 1. 🔧 Requisitos
 
-Rojo/alertas: #c91223
+- Ubuntu 20.04+ (o equivalente con soporte para systemd)
+- Git
+- Docker
+- Docker Compose
 
-Grises y Fondos Secundarios
+---
 
-Gris muy oscuro: #101010
+### 2. 🐳 Instalar Docker y Docker Compose
 
-Gris oscuro (inputs/paneles): #1e1e1e
-
-Gris medio (bordes/menús): #2a2a2a, #444
-
-Gris deshabilitado: #333
-
-Gris paneles: #3c3c3c
-
-Enlaces y Elementos Interactivos
-
-Enlaces normales: #66aaff (azul claro)
-
-Enlaces visitados: #9a80d4 (lavanda)
-
-Botones sociales:
-
-Facebook: #3b5998
-
-Twitter: #55acee
-
-WhatsApp: #4dc247
-
-Email: #7b6663
-
-Elementos Especiales
-
-Destacados/comentarios: #adcedf (azul pastel)
-
-Advertencias: #FEFBEA (amarillo claro)
-
-Promocionados: #8AAED9 (azul claro)
-
-Sombras/números: #FFB600 (dorado)
-
-Degradados y Variantes
-
-Botón "Menealo":
-
-Base: #e35614
-
-Degradado: linear-gradient(-180deg, #F5720E 0%, #FE4A00 100%)
-
-Base Oscura:
-- #121212 (fondo principal)
-- #1e1e1e (paneles/inputs)
-- #2a2a2a (barras de menú)
-
-Acentos Cálidos:
-- #e35614 🟧 (principal)
-- #ff8c40 🟠 (hover)
-- #c91223 🔴 (alertas)
-
-Textos:
-- #ddd ⚪ (principal)
-- #ccc ⚪ (secundario)
-- #aaa ⚪ (terciario)
-
-Enlaces:
-- #66aaff 🔵 (normal)
-- #9a80d4 🟣 (visitado)
-
-Elementos UI:
-- #444 🩶 (bordes)
-- #333 🩶 (deshabilitado)
-- #3c3c3c 🩶 (fondos)
-
-
-instalacion:
-# Instalar Docker
+```bash
 apt update && apt upgrade -y
 apt install -y docker.io
 
-# Iniciar y habilitar Docker
 systemctl start docker
 systemctl enable docker
 
-# Instalar Docker Compose
 curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
 chmod +x /usr/local/bin/docker-compose
 
 # Verificar instalación
 docker --version
 docker-compose --version
+```
 
+---
+
+### 3. 📦 Clonar el repositorio
+
+```bash
 git clone https://github.com/helloprocess/gogo
+cd gogo
+```
 
+---
 
+### 4. 🚀 Levantar la aplicación
+
+```bash
+docker-compose up -d --build
+```
+
+Esto:
+- Construye la imagen de PHP con las extensiones necesarias (incluido Xdebug, exif, etc).
+- Inicializa MySQL y carga `meneame.sql`.
+- Sirve la aplicación desde `http://localhost/` o la IP de tu servidor.
+
+---
+
+## 🧪 Comprobaciones útiles
+
+- 🌐 Accede a la web: `http://localhost` o `http://<tu_droplet_ip>`
+- 🧠 phpMyAdmin: `http://localhost:8080` (usuario `root`, contraseña `root`)
+- ⚙️ Portainer: `https://localhost:9443` (interfaz de gestión opcional)
+- 🔍 Verifica logs:
+  ```bash
+  docker logs meneame_php
+  docker logs meneame_nginx
+  ```
+
+---
+
+## 📁 Archivos importantes
+
+- `docker/nginx.conf` – configuración optimizada de Nginx (PATH_INFO incluido).
+- `docker/php.ini` – configuraciones de desarrollo y límites de carga ajustados.
+- `docker/xdebug.ini` – configuración activa para debugging con VS Code.
+- `sql/meneame.sql` – script que importa la base de datos inicial.
+- `meneame_ER.pdf` – **Diagrama E-R** para entender la estructura de la base de datos.
+
+---
+
+## 🧠 Consideraciones técnicas
+
+- `PATH_INFO` ha sido activado correctamente para `dispatcher.php`.
+- Las cookies y recursos estáticos están resueltos con rutas relativas para evitar problemas con `localhost`.
+- El contenedor PHP se ejecuta como root pero PHP-FPM como `www-data`, y se automatizan permisos de volúmenes con `entrypoint.sh`.
+- Nginx acepta cualquier `server_name` gracias a `server_name _;`.
+
+---
+
+## 🔐 Seguridad
+
+⚠️ Este entorno está preparado para desarrollo.  
+**No lo utilices en producción tal cual** sin:
+- HTTPS
+- Restricción de puertos públicos (Xdebug, phpMyAdmin, Portainer)
+- Contraseñas seguras y acceso limitado por firewall
+
+---
+
+## 📚 Créditos
+
+Proyecto original: [meneame/meneame](https://github.com/meneame/meneame)  
+Adaptación Dockerizada: [helloprocess/gogo](https://github.com/helloprocess/gogo)
+
+---
+
+## 📄 Licencia
+
+Distribuido bajo la [Licencia Apache 2.0](http://www.apache.org/licenses/LICENSE-2.0)
+
+---
+
+## 💡 ¿Preguntas o sugerencias?
+
+Crea un *issue* en el repositorio o abre un PR. ¡Gracias por contribuir!
