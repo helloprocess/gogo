@@ -30,7 +30,7 @@ RUN apt-get update && apt-get install -y \
        xml \
        simplexml \
        gettext \
-       bcmath \ 
+       bcmath \
     && pecl install xdebug igbinary \
     && docker-php-ext-enable xdebug igbinary
 
@@ -38,11 +38,16 @@ RUN apt-get update && apt-get install -y \
 COPY php.ini /usr/local/etc/php/conf.d/custom.ini
 COPY xdebug.ini /usr/local/etc/php/conf.d/xdebug.ini
 
-# Crear directorio de logs y establecer permisos
-RUN mkdir -p /var/log/php /var/log/xdebug \
-    && chmod -R 777 /var/log/php /var/log/xdebug \
-    && mkdir -p /var/www/localhost \
-    && chown -R www-data:www-data /var/www/localhost
+# Crear directorios de logs y cache, luego asignar permisos
+RUN mkdir -p /var/log/php /var/log/xdebug /var/www/www/cache/tmp \
+    && chown -R www-data:www-data /var/log/php /var/log/xdebug /var/www/www/cache \
+    && chmod -R 775 /var/log/php /var/log/xdebug /var/www/www/cache
+
+# Definir el volumen para usarlo como caché
+VOLUME ["/var/www/www/cache"]
+
+# Crear directorio base y asignar permisos
+RUN mkdir -p /var/www/localhost && chown -R www-data:www-data /var/www/localhost
 
 # Exponer puertos y configurar comando por defecto
 EXPOSE 9000 9003
