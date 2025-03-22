@@ -17,19 +17,33 @@ RUN apt-get update && apt-get install -y \
     sqlite3 \
     libsqlite3-dev \
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
-    && docker-php-ext-install exif gd mysqli pdo pdo_mysql pdo_sqlite mbstring zip dom xml simplexml gettext \
+    && docker-php-ext-install \
+       exif \
+       gd \
+       mysqli \
+       pdo \
+       pdo_mysql \
+       pdo_sqlite \
+       mbstring \
+       zip \
+       dom \
+       xml \
+       simplexml \
+       gettext \
+       bcmath \ 
     && pecl install xdebug igbinary \
     && docker-php-ext-enable xdebug igbinary
 
-# Configuración de PHP
+# Configuración de PHP (copias de ini)
 COPY php.ini /usr/local/etc/php/conf.d/custom.ini
 COPY xdebug.ini /usr/local/etc/php/conf.d/xdebug.ini
 
 # Crear directorio de logs y establecer permisos
-RUN mkdir -p /var/log/php /var/log/xdebug && chmod -R 777 /var/log/php /var/log/xdebug
-RUN mkdir -p /var/www/localhost && chown -R www-data:www-data /var/www/localhost
+RUN mkdir -p /var/log/php /var/log/xdebug \
+    && chmod -R 777 /var/log/php /var/log/xdebug \
+    && mkdir -p /var/www/localhost \
+    && chown -R www-data:www-data /var/www/localhost
 
-# Exponer puertos y configurar comandos por defecto
+# Exponer puertos y configurar comando por defecto
 EXPOSE 9000 9003
-
 CMD ["php-fpm"]
