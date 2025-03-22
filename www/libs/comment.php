@@ -6,6 +6,7 @@
 //      http://www.affero.org/oagpl.html
 // AFFERO GENERAL PUBLIC LICENSE is also included in the file called "COPYING".
 
+#[\AllowDynamicProperties]
 class Comment extends LCPBase
 {
     public $id = 0;
