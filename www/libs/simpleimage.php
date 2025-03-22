@@ -15,7 +15,7 @@
 * Link: http://www.white-hat-web-design.co.uk/articles/php-image-resizing.php
 *
 */
-
+#[\AllowDynamicProperties]
 class SimpleImage
 {
     public $image;
