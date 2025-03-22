@@ -6,137 +6,161 @@
 //              http://www.affero.org/oagpl.html
 //              http://www.affero.org/oagpl.html
 // AFFERO GENERAL PUBLIC LICENSE is also included in the file called "COPYING".
+function mi_error(string $mensaje, string $tipo): void
+{
+    static $colors = [
+        'dispatcher' => 33,
+        'links'      => 208,
+        'mysql'      => 28,
+        'error'      => 196,
+        // Añadimos la categoría "user" con color 46
+        'user'       => 46,
+    ];
+
+    $colorCode = $colors[$tipo] ?? 15;
+    // Prefijo "DEBUG" y luego :$tipo:
+    error_log("\033[38;5;{$colorCode}mDEBUG:{$tipo}: {$mensaje}\033[0m");
+}
+
+// ---------------------------------------------------------------------------------
+// A partir de aquí, el script original de user/index.php, con llamadas a mi_error():
+// ---------------------------------------------------------------------------------
 
 require_once __DIR__ . '/../config.php';
 require_once mnminclude . 'html1.php';
 require_once mnminclude . 'favorites.php';
 
-error_log("DEBUG: Inicio del script en " . __FILE__);
+// Mensaje de arranque
+mi_error("Inicio del script en ".__FILE__, 'user');
 
 $limit = (int)$globals['page_size'];
 $page = get_current_page();
 $offset = ($page - 1) * $limit;
-error_log("DEBUG: Página = $page, Límite = $limit, Offset = $offset");
+
+mi_error("Página=$page, Límite=$limit, Offset=$offset", 'user');
 
 if ($globals['bot'] && $page > 2) {
-    error_log("DEBUG: Bot detectado y página > 2. Abortando.");
+    mi_error("Bot detectado y página > 2. Se aborta con 404", 'user');
     do_error('Pages exceeded', 404);
 }
 
 if (!empty($_SERVER['PATH_INFO'])) {
-    error_log("DEBUG: PATH_INFO: " . $_SERVER['PATH_INFO']);
-
+    mi_error("PATH_INFO: " . $_SERVER['PATH_INFO'], 'user');
     $url_args = preg_split('/\/+/', $_SERVER['PATH_INFO'], 6, PREG_SPLIT_NO_EMPTY);
-    error_log("DEBUG: url_args array: " . print_r($url_args, true));
 
-    array_shift($url_args); // eliminar "user"
+    mi_error("url_args: " . print_r($url_args, true), 'user');
+
+    array_shift($url_args); // quita la parte "user"
 
     $_REQUEST['login'] = clean_input_string($url_args[0] ?? '');
-    $_REQUEST['view'] = clean_input_string($url_args[1] ?? '');
-    $_REQUEST['uid'] = intval($url_args[2] ?? 0);
+    $_REQUEST['view']  = clean_input_string($url_args[1] ?? '');
+    $_REQUEST['uid']   = intval($url_args[2] ?? 0);
 
+    // Si el tercer segmento es 0 pero el segundo segmento es un número, reinterpretamos
     if (!$_REQUEST['uid'] && is_numeric($_REQUEST['view'])) {
-        $_REQUEST['uid'] = intval($_REQUEST['view']);
+        $_REQUEST['uid']  = intval($_REQUEST['view']);
         $_REQUEST['view'] = '';
+        mi_error("Detectado view numérico, reasignando uid=" . $_REQUEST['uid'], 'user');
     }
-
-    error_log("DEBUG: login=" . $_REQUEST['login'] . " | view=" . $_REQUEST['view'] . " | uid=" . $_REQUEST['uid']);
 } else {
     $_REQUEST['login'] = clean_input_string($_REQUEST['login'] ?? '');
-    $_REQUEST['uid'] = intval($_REQUEST['uid'] ?? 0);
-    $_REQUEST['view'] = clean_input_string($_REQUEST['view'] ?? '');
+    $_REQUEST['uid']   = intval($_REQUEST['uid'] ?? 0);
+    $_REQUEST['view']  = clean_input_string($_REQUEST['view'] ?? '');
+
+    mi_error("Sin PATH_INFO => login={$_REQUEST['login']}, uid={$_REQUEST['uid']}, view={$_REQUEST['view']}", 'user');
 
     if (!empty($_REQUEST['login'])) {
-        $url = html_entity_decode(get_user_uri($_REQUEST['login'], $_REQUEST['view']));
-        error_log("DEBUG: Redirigiendo a $url");
-        die(header("Location: $url"));
+        $redir = get_user_uri($_REQUEST['login'], $_REQUEST['view']);
+        mi_error("Redirigiendo a $redir por no llevar PATH_INFO", 'user');
+        die(header('Location: ' . html_entity_decode($redir)));
     }
 }
 
+$user  = new User();
+$login = $_REQUEST['login'];
+$uid   = $_REQUEST['uid'];
+$view  = $_REQUEST['view'];
 
-$user = new User();
+mi_error("login=$login, uid=$uid, view=$view", 'user');
 
-$login = $_REQUEST['login'] ?? '';
-$uid = isset($_REQUEST['uid']) ? (int) $_REQUEST['uid'] : 0;
-$view = $_REQUEST['view'] ?? '';
-error_log("DEBUG: login = $login, uid = $uid, view = $view");
-
+// Si el login está vacío y el usuario actual existe, redirige a su propia URL:
 if (empty($login)) {
-    error_log("DEBUG: login vacío");
     if ($current_user->user_id > 0) {
-        $expected_url = get_user_uri($current_user->user_login);
-        error_log("DEBUG: Usuario actual existe, URL esperada = $expected_url, REQUEST_URI = " . $_SERVER['REQUEST_URI']);
-        if ($_SERVER['REQUEST_URI'] !== $expected_url) {
-            error_log("DEBUG: Redireccionando a URL esperada: $expected_url");
-            die(header("Location: $expected_url"));
-        }
+        $myUrl = get_user_uri($current_user->user_login);
+        mi_error("login vacío, redirigiendo a la URL del usuario actual: $myUrl", 'user');
+        die(header('Location: ' . html_entity_decode($myUrl)));
     } else {
-        error_log("DEBUG: No hay usuario actual, redireccionando a base_url: " . $globals['base_url']);
+        mi_error("login vacío y sin usuario actual => va a base_url", 'user');
         die(header('Location: ' . $globals['base_url']));
     }
 }
 
+// Bloque admin
 if ($current_user->admin) {
+    mi_error("Usuario DETECTADO como admin. uid=$uid", 'user');
     if ($uid > 0) {
         $user->id = $uid;
+        mi_error("uid>0 => user->id=$uid", 'user');
     } else {
-        $redirect_url = html_entity_decode(get_user_uri_by_uid($uid, $view));
-        error_log("DEBUG: Usuario admin, redireccionando usando get_user_uri_by_uid: $redirect_url");
-        die(redirect($redirect_url));
+        // Ojo, cuando uid es 0 => genera la URL con get_user_uri_by_uid
+        $redir_admin = get_user_uri_by_uid($login, $view);
+        mi_error("uid=0 => redireccion admin a $redir_admin", 'user');
+        die(redirect(html_entity_decode($redir_admin)));
     }
 } else {
+    mi_error("Usuario NO admin. uid=$uid", 'user');
     if ($uid > 0) {
-        $redirect_url = html_entity_decode(get_user_uri($uid, $view));
-        error_log("DEBUG: Usuario no admin, uid > 0, redireccionando a: $redirect_url");
-        die(header('Location: ' . $redirect_url));
+        // Ojo: aquí se usa el login para la ruta, no el uid.
+        $redir_non_admin = get_user_uri($login, $view);
+        mi_error("uid>0 => Redir no admin a $redir_non_admin", 'user');
+        die(header('Location: ' . html_entity_decode($redir_non_admin)));
     }
+    // Si uid=0, se supone que login sí está relleno, asignamos al objeto
     $user->username = $login;
+    mi_error("Asignando user->username=$login", 'user');
 }
-error_log("DEBUG: Después de determinar el usuario, view = $view");
 
 $view = $view ?: 'profile';
-error_log("DEBUG: view final = $view");
+mi_error("view final=$view", 'user');
 
 if (!$user->read()) {
-    error_log("DEBUG: read() del usuario devolvió false");
+    mi_error("No se encontró el usuario $login (uid=$uid) en la BD", 'user');
     do_error(_('usuario inexistente'), 404);
 }
 
-$globals['search_options'] = array('u' => $user->username);
-error_log("DEBUG: search_options: " . print_r($globals['search_options'], true));
+$globals['search_options'] = ['u' => $user->username];
+mi_error("search_options[u] = {$user->username}", 'user');
 
-// El usuario ve el perfil y se marca como amigo inverso si corresponde
+// Marcar la amistad inversa si aplica
 if ($current_user->user_id) {
     $user->friendship_reverse = User::friend_exists($user->id, $current_user->user_id);
-    error_log("DEBUG: friendship_reverse = " . var_export($user->friendship_reverse, true));
+    mi_error("friendship_reverse=".var_export($user->friendship_reverse,true), 'user');
 } else {
     $user->friendship_reverse = 0;
-    error_log("DEBUG: No hay usuario actual, friendship_reverse = 0");
+    mi_error("Sin current_user => friendship_reverse=0", 'user');
 }
 
-// Para editar notas y enviar mensajes privados
+// Para editar notas y mandar privados
 if ($current_user->user_id == $user->id || $current_user->admin || $user->friendship_reverse) {
     $globals['extra_js'][] = 'ajaxupload.min.js';
-    error_log("DEBUG: Se añade ajaxupload.min.js en extra_js");
+    mi_error("Se añade ajaxupload.min.js => user propio, admin, o friend_reverse", 'user');
 }
 
-// Habilitar AdSense para el usuario
+// AdSense
 if ($globals['external_user_ads'] && !empty($user->adcode)) {
-    $globals['user_adcode'] = $user->adcode;
+    $globals['user_adcode']    = $user->adcode;
     $globals['user_adchannel'] = $user->adchannel;
-    error_log("DEBUG: AdSense habilitado: adcode = " . $user->adcode . ", adchannel = " . $user->adchannel);
     if ($current_user->user_id == $user->id || $current_user->admin) {
         $globals['do_user_ad'] = 100;
     } else {
         $globals['do_user_ad'] = $user->karma * 2;
     }
-    error_log("DEBUG: do_user_ad = " . $globals['do_user_ad']);
+    mi_error("do_user_ad=".$globals['do_user_ad'].", adcode={$user->adcode}", 'user');
 }
 
 $globals['noindex'] = true;
-error_log("DEBUG: noindex establecido a true");
 
-// Verificar si se debe indexar y si las opciones son válidas, de lo contrario se llama a do_error()
+// Enrutador de vistas
 switch ($view) {
     case 'articles':
     case 'articles_private':
@@ -145,7 +169,6 @@ switch ($view) {
     case 'articles_discard':
         $menu = 'articles';
         break;
-
     case 'history':
     case 'shaken':
     case 'favorites':
@@ -153,13 +176,11 @@ switch ($view) {
     case 'discard':
         $menu = 'history';
         break;
-
     case 'subs':
     case 'subs_follow':
         $menu = 'subs';
         $globals['noindex'] = false;
         break;
-
     case 'commented':
     case 'conversation':
     case 'shaken_comments':
@@ -167,7 +188,6 @@ switch ($view) {
         $menu = 'comments';
         $globals['search_options']['w'] = 'comments';
         break;
-
     case 'notes':
     case 'notes_friends':
     case 'notes_favorites':
@@ -176,85 +196,70 @@ switch ($view) {
     case 'notes_privates':
         $menu = 'notes';
         break;
-
     case 'friends':
     case 'friend_of':
     case 'friends_new':
     case 'ignored':
         $menu = 'relations';
         break;
-
     case 'profile':
         $menu = 'profile';
         break;
-
     default:
-        error_log("DEBUG: Opción de view inválida: $view");
+        mi_error("Opción view=$view inexistente => 404", 'user');
         do_error(_('opción inexistente'), 404);
         break;
 }
-error_log("DEBUG: Menú seleccionado: $menu");
 
-// Añadir dirección canónica
-$canonical_url = '//' . get_server_name() . $user->get_uri();
-$globals['extra_head'] = '<link rel="canonical" href="' . $canonical_url . '" />' . "\n";
-error_log("DEBUG: URL canónica: " . $canonical_url);
+// Canónica
+$globals['extra_head'] = '<link rel="canonical" href="//' . get_server_name() . $user->get_uri() . '" />' . "\n";
 $globals['extra_css'][] = 'jquery.autocomplete.css';
 
 $header_title = $user->username;
 if (!empty($user->names)) {
     $header_title .= ' (' . $user->names . ')';
 }
-error_log("DEBUG: Título del header: " . $header_title);
 
-// Mostrar el número de respuestas sin leer a sus comentarios
+// Mostrar número de respuestas sin leer
 if ($current_user->user_id == $user->id) {
-    $extra_comment = Comment::get_unread_conversations($user->id);
-    $globals['extra_comment_conversation'] = ' [' . $extra_comment . ']';
-    error_log("DEBUG: extra_comment_conversation = [" . $extra_comment . "]");
+    $globals['extra_comment_conversation'] = ' [' . Comment::get_unread_conversations($user->id) . ']';
 } else {
     $globals['extra_comment_conversation'] = '';
-    error_log("DEBUG: extra_comment_conversation vacío");
 }
 
 do_header($header_title, 'profile', User::get_menu_items($view, $user));
-error_log("DEBUG: do_header() ejecutado");
+mi_error("Header cargado. Título: $header_title, menu=$view", 'user');
 
 $user->all_stats();
 $user->bio = $user->bio ?: '';
-error_log("DEBUG: Estadísticas del usuario cargadas. Bio = " . $user->bio);
+mi_error("Leídas estadísticas user. Bio={$user->bio}", 'user');
 
 if ($current_user->user_id == $user->id || $current_user->admin) {
     $strike = (new Strike($user))->getUserCurrentStrike();
-    error_log("DEBUG: Strike del usuario: " . print_r($strike, true));
+    mi_error("Strike actual: ".print_r($strike,true), 'user');
 } else {
     $strike = null;
-    error_log("DEBUG: Strike: null");
 }
 
 $medals = $user->getMedals();
-error_log("DEBUG: Medallas del usuario: " . print_r($medals, true));
+mi_error("Medallas user: ".print_r($medals,true), 'user');
 
+// Cargar plantillas
 Haanga::Load('user/header.html', compact('user', 'medals', 'menu', 'strike'));
-error_log("DEBUG: Se cargó user/header.html");
-
 Haanga::Load('user/submenu.html', [
     'options' => ($options = Tabs::optionsFromProfile($view)),
-    'view' => $view
+    'view'    => $view
 ]);
-error_log("DEBUG: Se cargó user/submenu.html con opciones: " . print_r($options, true) . " y view: " . $view);
 
 if ($user->ignored() && ($view !== 'profile')) {
-    error_log("DEBUG: Usuario ignorado, cargando user/ignored.html");
+    mi_error("El usuario está ignorado, se muestra user/ignored.html", 'user');
     Haanga::Load('user/ignored.html');
 } else {
-    $view_file = __DIR__ . '/' . $menu . '/' . $view . '.php';
-    error_log("DEBUG: Cargando archivo de vista: " . $view_file);
-    require $view_file;
+    $view_path = __DIR__.'/'.$menu.'/'.$view.'.php';
+    mi_error("Cargando vista: $view_path", 'user');
+    require $view_path;
 }
 
 Haanga::Load('user/footer.html');
-error_log("DEBUG: Se cargó user/footer.html");
-
 do_footer();
-error_log("DEBUG: do_footer() ejecutado. Fin del script.");
+mi_error("Fin del script user/index.php", 'user');
