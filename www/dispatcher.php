@@ -6,17 +6,16 @@
 function mi_error(string $mensaje, string $tipo): void
 {
     static $colors = [
-        'dispatcher' => 33,  // Azul gris
-        'links'      => 208, // Naranja
-        'mysql'      => 28,  // Verde oscuro
-        'error'      => 196, // Rojo intenso
+        'dispatcher' => 33,
+        'links'      => 208,
+        'mysql'      => 28,
+        'error'      => 196,
+        // Añadimos la categoría "user" con color 46
+        'user'       => 46,
     ];
-    
-    // Obtiene el color según $tipo, o si no existe, usa 15 (blanco)
+
     $colorCode = $colors[$tipo] ?? 15;
-    
-    // Prefijamos "DEBUG" solo como un ejemplo. Puedes quitarlo o cambiarlo.
-    // \033[0m al final para resetear el color.
+    // Prefijo "DEBUG" y luego :$tipo:
     error_log("\033[38;5;{$colorCode}mDEBUG:{$tipo}: {$mensaje}\033[0m");
 }
 

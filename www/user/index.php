@@ -6,25 +6,7 @@
 //              http://www.affero.org/oagpl.html
 //              http://www.affero.org/oagpl.html
 // AFFERO GENERAL PUBLIC LICENSE is also included in the file called "COPYING".
-function mi_error(string $mensaje, string $tipo): void
-{
-    static $colors = [
-        'dispatcher' => 33,
-        'links'      => 208,
-        'mysql'      => 28,
-        'error'      => 196,
-        // Añadimos la categoría "user" con color 46
-        'user'       => 46,
-    ];
 
-    $colorCode = $colors[$tipo] ?? 15;
-    // Prefijo "DEBUG" y luego :$tipo:
-    error_log("\033[38;5;{$colorCode}mDEBUG:{$tipo}: {$mensaje}\033[0m");
-}
-
-// ---------------------------------------------------------------------------------
-// A partir de aquí, el script original de user/index.php, con llamadas a mi_error():
-// ---------------------------------------------------------------------------------
 
 require_once __DIR__ . '/../config.php';
 require_once mnminclude . 'html1.php';
