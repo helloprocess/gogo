@@ -1,6 +1,6 @@
 <?php
-// The source code packaged with this file is Free Software, Copyright (C) 2005-2011 by
-// Ricardo Galli <gallir at uib dot es>.
+// The source code packaged with this file is Free Software, Copyright (C) 
+// 2005-2011 by Ricardo Galli <gallir at uib dot es>.
 // It's licensed under the AFFERO GENERAL PUBLIC LICENSE unless stated otherwise.
 // You can get copies of the licenses here:
 //      http://www.affero.org/oagpl.html
@@ -8,23 +8,67 @@
 
 class Time
 {
-    protected function strftime($format, $date)
+    /**
+     * Reemplazo básico de strftime usando DateTime::format().
+     * Convierte tokens %... más comunes de strftime a los de DateTime.
+     */
+    protected static function my_strftime(string $format, $date): string
     {
-        return strftime($format, is_numeric($date) ? $date : strtotime($date));
+        // Asegurar timestamp numérico
+        $timestamp = is_numeric($date) ? (int)$date : strtotime($date);
+
+        // Crea objeto DateTime
+        $dt = new \DateTime();
+        $dt->setTimestamp($timestamp);
+
+        // Mapeo de tokens strftime => DateTime::format
+        $reemplazos = [
+            '%a' => 'D',     // día corto (Mon, Tue...)
+            '%A' => 'l',     // día completo (Monday, Tuesday...)
+            '%d' => 'd',     // día con cero inicial (01..31)
+            '%e' => 'j',     // día sin cero inicial (1..31) ~aprox
+            '%m' => 'm',     // mes con cero inicial (01..12)
+            '%_m'=> 'n',     // mes sin cero (1..12)
+            '%b' => 'M',     // mes corto en inglés (Jan, Feb...)
+            '%B' => 'F',     // mes completo en inglés (January...)
+            '%y' => 'y',     // año sin siglo (00..99)
+            '%Y' => 'Y',     // año con siglo (2025)
+            '%H' => 'H',     // hora 00..23
+            '%I' => 'h',     // hora 01..12
+            '%p' => 'A',     // AM o PM
+            '%M' => 'i',     // minutos 00..59
+            '%S' => 's',     // segundos 00..59
+            '%w' => 'w',     // día de la sem. (0=Dom..6=Sáb)
+            '%u' => 'N',     // día sem. ISO (1=Lun..7=Dom)
+            '%R' => 'H:i',   // hora:min 24h
+            '%T' => 'H:i:s', // hora:min:seg 24h
+            // Añade más si lo necesitas
+        ];
+
+        // Reemplazar tokens
+        $format = strtr($format, $reemplazos);
+
+        // Devolver el formateo
+        return $dt->format($format);
     }
 
+    // --- Métodos públicos que antes usaban strftime ---
     public static function year($date)
     {
-        return (int) static::strftime('%Y', $date);
+        // Equivale a strftime('%Y', $date)
+        return (int) static::my_strftime('%Y', $date);
     }
 
     public static function yearShort($date)
     {
-        return (int) static::strftime('%g', $date);
+        // Equivale a strftime('%g', $date)
+        return (int) static::my_strftime('%g', $date);
     }
 
     public static function month($date)
     {
+        // Equivale a strftime('%m', $date) => 01..12, casteado a int => 1..12
+        $numMes = (int) static::my_strftime('%m', $date);
         return [
             1 => _('enero'),
             2 => _('febrero'),
@@ -38,16 +82,19 @@ class Time
             10 => _('octubre'),
             11 => _('noviembre'),
             12 => _('diciembre'),
-        ][(int) static::strftime('%m', $date)];
+        ][$numMes];
     }
 
     public static function monthSort($date)
     {
+        // Usa el valor devuelto por month(...) y extrae los 3 primeros caracteres
         return substr(static::month($date), 0, 3);
     }
 
     public static function day($date)
     {
+        // Equivale a strftime('%u', $date) => 1..7 
+        $numDiaIso = (int) static::my_strftime('%u', $date);
         return [
             1 => _('lunes'),
             2 => _('martes'),
@@ -56,7 +103,7 @@ class Time
             5 => _('viernes'),
             6 => _('sábado'),
             7 => _('domingo'),
-        ][(int) static::strftime('%u', $date)];
+        ][$numDiaIso];
     }
 
     public static function dayShort($date)
@@ -66,12 +113,16 @@ class Time
 
     public static function hour($date)
     {
-        return static::strftime('%R', $date);
+        // Equivale a strftime('%R', $date) => HH:MM en 24h
+        return static::my_strftime('%R', $date);
     }
 
     public static function dayMonthSortHour($date)
     {
-        return static::strftime('%e', $date).'/'.static::monthSort($date).' - '.static::hour($date).'h';
+        // Equivale a: '%e' => sin cero, luego '/', luego monthSort(...), etc.
+        // Lo combinamos en la misma lógica
+        $dia = static::my_strftime('%e', $date); // 1..31 ~ (sin cero)
+        return $dia . '/' . static::monthSort($date) . ' - ' . static::hour($date) . 'h';
     }
 
     public static function diff($from, $now = 0)
@@ -88,13 +139,10 @@ class Time
 
         $diff = $now - $from;
         $days = intval($diff / 86400);
-
         $diff = $diff % 86400;
         $hours = intval($diff / 3600);
-
         $diff = $diff % 3600;
         $minutes = intval($diff / 60);
-
         $secs = $diff % 60;
 
         if ($days > 1) {
