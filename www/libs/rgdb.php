@@ -1,11 +1,4 @@
 <?php
-// The source code packaged with this file is Free Software, Copyright (C) 2010 by
-// Ricardo Galli <gallir at gmail dot com>.
-// It's licensed under the AFFERO GENERAL PUBLIC LICENSE unless stated otherwise.
-// You can get copies of the licenses here:
-//      http://www.affero.org/oagpl.html
-// AFFERO GENERAL PUBLIC LICENSE is also included in the file called "COPYING".
-
 #[\AllowDynamicProperties]
 class RGDB extends mysqli
 {
@@ -41,14 +34,14 @@ class RGDB extends mysqli
         $this->initial_query = false;
         $this->connect_timeout = 10;
 
-        // Check the IP is not banned before doing anything more
+        // Check IP banned
         if ($check_ban) {
-            $this->ban_checked = check_ip_noaccess(1); // 1 == only cache
+            $this->ban_checked = check_ip_noaccess(1); 
         } else {
             $this->ban_checked = true;
         }
 
-        // In case it's run from a web server we limit the number of rows
+        // Límite de resultados si estamos en entorno web
         if (!empty($_SERVER['HTTP_HOST'])) {
             $this->max_rows = self::MAX_ROWS;
         } else {
@@ -67,14 +60,13 @@ class RGDB extends mysqli
             return;
         }
 
-        // Rollback dangling transactions
+        // Rollback si quedara transacción pendiente
         if ($this->in_transaction > 0) {
             parent::rollback();
             syslog(LOG_INFO, "Dangling transactions, rollback forced " . $_SERVER['SCRIPT_NAME']);
         }
 
         parent::close();
-
         $this->connected = false;
     }
 
@@ -91,10 +83,23 @@ class RGDB extends mysqli
     public function initial_query($query)
     {
         $this->initial_query = $query;
-
         if ($this->connected) {
             return $this->query($query);
         }
+    }
+
+    public function transaction()
+    {
+        $this->in_transaction++;
+        if ($this->in_transaction == 1) {
+            $this->query('START TRANSACTION');
+        } else {
+            $savep = $this->savepoint_name();
+            if (!$this->query('SAVEPOINT ' . $savep)) {
+                syslog(LOG_INFO, 'Error SAVEPOINT ' . $savep . ' ' . $_SERVER['SCRIPT_NAME']);
+            }
+        }
+        return $this->in_transaction;
     }
 
     public function savepoint_name()
@@ -104,20 +109,6 @@ class RGDB extends mysqli
         }
     }
 
-    public function transaction()
-    {
-        $this->in_transaction++;
-
-        if ($this->in_transaction == 1) {
-            $this->query('START TRANSACTION');
-        } elseif (!$this->query('SAVEPOINT ' . $this->savepoint_name())) {
-            syslog(LOG_INFO, 'Error SAVEPOINT ' . $this->savepoint_name() . ' ' . $_SERVER['SCRIPT_NAME']);
-        }
-
-        return $this->in_transaction;
-    }
-
-    
     #[\ReturnTypeWillChange]
     public function commit($flags = null, $name = null)
     {
@@ -137,7 +128,6 @@ class RGDB extends mysqli
         }
 
         $this->in_transaction--;
-
         return $r;
     }
 
@@ -160,12 +150,10 @@ class RGDB extends mysqli
         }
     
         $this->in_transaction--;
-    
         return $r;
     }
-    
 
-    // Reset the connection to the slave if it was using the master
+    // Reset to the slave if we were on the master
     public function barrier()
     {
     }
@@ -180,72 +168,74 @@ class RGDB extends mysqli
     ): bool
     {
         if ($this->connected) {
-            return true; // ✅ Devuelve un booleano
+            return true;
         }
-    
+
         @parent::init();
         @parent::options(MYSQLI_OPT_CONNECT_TIMEOUT, $this->connect_timeout);
-    
+
         if ($this->persistent && version_compare(PHP_VERSION, '5.3.0') > 0) {
             $this->connected = @parent::real_connect('p:' . $this->dbhost, $this->dbuser, $this->dbpassword, $this->dbname, $this->port);
         } else {
             $this->connected = @parent::real_connect($this->dbhost, $this->dbuser, $this->dbpassword, $this->dbname, $this->port);
         }
-    
+
         if (!$this->connected) {
             header('HTTP/1.1 503 Service Unavailable');
-            return false; // ✅ Devuelve `false` en caso de error
+            return false;
         }
-    
+
         $this->set_charset('utf8');
-    
-        // Check the IP is not banned before doing anything more
+
         if (!$this->ban_checked) {
-            check_ip_noaccess(2); // 2 == don't check in cache
+            check_ip_noaccess(2); 
             $this->ban_checked = true;
         }
-    
+
         if ($this->initial_query) {
             $this->query($this->initial_query);
         }
-    
-        return true; // ✅ Siempre retorna `true` al final si la conexión fue exitosa
+
+        return true;
     }
-    
 
     public function escape($str)
     {
         $this->connect();
-    
         if ($str === null) {
             $str = '';
         }
-    
         return $this->real_escape_string($str);
     }
-    
 
+    /**
+     * Envía error a la función mi_error() si show_errors está activo
+     * y también a syslog.
+     */
     public function print_error($str = '')
     {
         if ($this->show_errors) {
-            if (headers_sent() === false) {
+            if (!headers_sent()) {
                 header('HTTP/1.1 503 Database error');
                 header('Content-Type: text/plain');
             }
-
-            dd($str, $this->error, true);
+            // Llamada a tu función de debug con tipo "mysql"
+            mi_error("MySQL Error.\nQuery: $str\nMySQL says: " . $this->error, 'mysql');
         }
 
         syslog(LOG_NOTICE, "rgdb.php ($this->dbhost) error $str " . $_SERVER['REQUEST_URI'] . " ($this->error)");
-
         return false;
     }
 
     public function flush()
     {
-        $this->last_result = array();
+        $this->last_result = [];
     }
 
+    /**
+     * Ejecuta la query y guarda los resultados en $this->last_result si es SELECT.
+     * Hace logging con mi_error() y muestra en el log las 2 llamadas superiores (backtrace).
+     */
     #[\ReturnTypeWillChange]
     public function query($query, $class_name = null, $index_name = null)
     {
@@ -253,90 +243,83 @@ class RGDB extends mysqli
 
         $this->connect();
 
-        // Flush cached values..
-        $this->last_result = array();
+        // Vaciamos resultados anteriores
+        $this->last_result = [];
+
+        // Preparamos backtrace y mostramos las dos llamadas inmediatamente anteriores
         $backtrace = debug_backtrace();
-        if (isset($backtrace[1]['function'])) {
-            error_log("\033[33m[QUERY LOG] Esta función fue llamada por: " . $backtrace[1]['function']. "\033[0m");
-        } else {
-            error_log("\033[33m[QUERY LOG] No fue llamada por ninguna función (llamada directa).". "\033[0m");
+        $bt_info = [];
+        // Del índice 1 en adelante son los llamadores
+        for ($i = 1; $i <= 2; $i++) {
+            if (isset($backtrace[$i])) {
+                $fn   = $backtrace[$i]['function'] ?? '(no-fn)';
+                $file = $backtrace[$i]['file'] ?? '(no-file)';
+                $line = $backtrace[$i]['line'] ?? '(no-line)';
+                $bt_info[] = "#$i => function '$fn' at $file:$line";
+            }
         }
-        error_log("\033[33m[QUERY LOG] " . $query . "\033[0m");
-        //echo "<pre>QUERY: " . htmlspecialchars($query) . "</pre>";
+        // Log con tu función
+        mi_error("[QUERY LOG] Backtrace:\n" . implode("\n", $bt_info), 'mysql');
+        mi_error("[QUERY LOG] $query", 'mysql');
+
+        // Realizamos la consulta
         $result = @parent::query($query);
 
+        // Si falla => se imprime error y se retorna false
         if (!$result) {
             return $this->print_error($query);
         }
 
-        if (!$class_name) {
-            $class_name = 'stdClass';
-        }
-
+        // No es SELECT => devolvemos true y listo
         if (!$is_select) {
             return true;
         }
 
+        // En SELECT: pasamos resultados a last_result
+        if (!$class_name) {
+            $class_name = 'stdClass';
+        }
+
         $num_rows = 0;
-
         while (($row = $result->fetch_object($class_name)) && ($num_rows < $this->max_rows)) {
-            // We put a limit
-            if ($index_name) {
-                $index = $row->$index_name;
-            } else {
-                $index = $num_rows;
-            }
-
+            $index = $index_name ? $row->$index_name : $num_rows;
             $this->last_result[$index] = $row;
-
             $num_rows++;
         }
 
+        global $globals;
         if ($num_rows >= $this->max_rows) {
-            syslog(LOG_INFO, 'MAX_ROWS reached by ' . $globals['user_ip'] . ' in ' . $_SERVER['REQUEST_URI']);
+            syslog(LOG_INFO, 'MAX_ROWS reached by ' . ($globals['user_ip'] ?? '??') . ' in ' . ($_SERVER['REQUEST_URI'] ?? '??'));
         }
 
         @$result->close();
-
         return true;
     }
 
     public function object_iterator($query, $class = null)
     {
-        $is_select = preg_match('/^ *(select|show)\s/i', $query);
-
+        $is_select = preg_match('/^\s*(select|show)\s/i', trim($query));
         $this->connect();
 
-        // query succeeded
         if (!$this->real_query($query)) {
             return false;
         }
 
-        // SELECT, SHOW, DESCRIBE
         if ($is_select && $this->field_count) {
             return new QueryResult($this, $class);
         }
-
-        // INSERT, UPDATE, DELETE
         return $this->affected_rows;
     }
 
     public function get_var($query = null, $x = 0, $y = 0)
     {
-        // If there is a query then perform it if not then use cached results..
         if ($query) {
             $this->query($query);
         }
-
-        // Extract var out of cached results based x,y vals
         if (!empty($this->last_result[$y]) && is_object($this->last_result[$y])) {
             $values = array_values(get_object_vars($this->last_result[$y]));
         }
-
-        // If there is a value return it else return null
-        if (isset($values[$x])) {
-            return $values[$x];
-        }
+        return $values[$x] ?? null;
     }
 
     public function get_object($query, $class)
@@ -349,41 +332,28 @@ class RGDB extends mysqli
         if ($query) {
             $this->query($query, $class_name);
         }
-
-        if (isset($this->last_result[$y])) {
-            return $this->last_result[$y];
-        }
+        return $this->last_result[$y] ?? null;
     }
 
-    //  Function to get 1 column from the cached result set based in X index
     public function get_col($query = null, $x = 0)
     {
-        // If there is a query then perform it if not then use cached results..
         if ($query) {
             $this->query($query);
         }
-
-        // Extract the column values
-        $return = array();
+        $return = [];
         $n = count($this->last_result);
-
         for ($i = 0; $i < $n; $i++) {
             $return[$i] = $this->get_var(null, $x, $i);
         }
-
         return $return;
     }
 
-    // Return the the query as a result set - see docs for more details
     public function get_results($query = null, $class_name = null, $index_name = null)
     {
-        // If there is a query then perform it if not then use cached results..
         if ($query) {
             $this->query($query, $class_name, $index_name);
         }
-
-        // Send back array of objects. Each row is an object
-        return $this->last_result ?: array();
+        return $this->last_result ?: [];
     }
 
     public function get_enum_values($table, $column)
@@ -400,28 +370,22 @@ class RGDB extends mysqli
             ];
         }
 
-        // Retrieve available status values
+        // SHOW COLUMNS ... y parsear
         $row = $this->get_row('SHOW COLUMNS FROM `' . $table . '` LIKE "' . $column . '"');
-
-        preg_match_all("/'(.*?)'/", $row->Type, $matches);
-
+        preg_match_all("/'(.*?)'/", $row->Type ?? '', $matches);
         if (empty($matches[1])) {
-            return array();
+            return [];
         }
 
-        $enum = array();
-
+        $enum = [];
         foreach ($matches[1] as $v => $str) {
             $enum[$str] = $v + 1;
         }
-
         return $enum;
     }
 }
 
-// Iterators inspired from:
-//     http://techblog.procurios.nl/k/news/view/33914/14863/Syntactic-Sugar-for-MySQLi-Results-using-SPL-Iterators.html
-
+// Iterators for results, etc.
 class ObjectIterator implements Iterator
 {
     protected $result;
@@ -464,7 +428,6 @@ class ObjectIterator implements Iterator
     public function current()
     {
         $this->currentRow->read = true;
-
         return $this->currentRow;
     }
 
@@ -477,6 +440,8 @@ class ObjectIterator implements Iterator
 
 class QueryResult extends MySQLi_Result implements IteratorAggregate
 {
+    protected $class;
+
     public function __construct($result, $class = null)
     {
         parent::__construct($result);
